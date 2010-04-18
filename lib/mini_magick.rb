@@ -162,7 +162,7 @@ module MiniMagick
   end
 
   # Combines multiple images into a single montage via ImageMagick's montage script
-  class Montage < Image
+  class Montage
     # Class Methods
     # -------------
     
