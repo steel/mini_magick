@@ -161,6 +161,49 @@ module MiniMagick
     end
   end
 
+  # Combines multiple images into a single montage via ImageMagick's montage script
+  class Montage < Image
+    # Class Methods
+    # -------------
+    
+    # To create a montage simply call Montage.new with the images you want combine,
+    # the path to the output file and any command line options you may want. 
+    # You will be returned a MiniMagick::Image instance for the new montage:
+    #
+    #   image1 = MiniMagick::Image.open('alice.png')
+    #   image2 = MiniMagick::Image.open('bob.png')
+    #   output_image = MiniMagick::Composite.new([image1, image2], 'jpg', :background => '#336699')
+    #   output_image.write('montage.jpg')
+    #
+    # The above example would combine the two images into a new JPEG file using a background color of #336699.
+    # The the image is saved using the standard Image.save method.
+    #
+    # The 'montage' script has several options, see here: http://www.imagemagick.org/script/montage.php
+    def self.new(images, output_extension, options={})
+      begin
+        tempfile = ImageTempFile.new(output_extension)
+        tempfile.binmode
+      ensure
+        tempfile.close
+      end
+      
+      args = options.collect { |key,value| "-#{key.to_s} #{value.to_s}" }  # collect hash parts into arguments
+      images.each do |image|
+        args.push image.path
+      end
+      args.push(tempfile.path)
+
+      # This is a little hacky - cannikin's CommandeRunner would be a useful
+      # alternative (http://github.com/cannikin/mini_magick).
+      Image.new(images.first.path).run_command('montage', *args)
+      return Image.open(tempfile.path)
+    end
+
+    def run
+    end
+    
+  end
+
   class CommandBuilder
     attr :args
 
