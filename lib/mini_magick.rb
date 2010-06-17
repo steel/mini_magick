@@ -189,9 +189,8 @@ module MiniMagick
       end
       args.push(tempfile.path)
 
-      # This is a little hacky - cannikin's CommandeRunner would be a useful
-      # alternative (http://github.com/cannikin/mini_magick).
-      Image.new(images.first.path).run_command('montage', *args)
+      CommandRunner::run('montage', *args)
+
       return Image.open(tempfile.path)
     end
 
@@ -200,6 +199,34 @@ module MiniMagick
     
   end
 
+
+  # Does the job of running commands in the shell.
+  class CommandRunner
+
+    # Class Methods
+    # -------------
+    def self.run(command, *args)
+      args.collect! do |arg|        
+        # args can contain characters like '>' so we must escape them, but don't quote switches
+        if arg !~ /^\+|\-/
+          "\"#{arg}\""
+        else
+          arg.to_s
+        end
+      end
+
+      command = "#{command} #{args.join(' ')}"
+      output = `#{command} 2>&1`
+
+      if $?.exitstatus != 0
+        raise MiniMagickError, "ImageMagick command (#{command.inspect}) failed: #{{:status_code => $?, :output => output}.inspect}"
+      else
+        output
+      end
+    end
+
+  end
+  
   class CommandBuilder
     attr :args
 
