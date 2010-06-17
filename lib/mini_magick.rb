@@ -31,7 +31,7 @@ module MiniMagick
       # Use this if you don't want to overwrite the image file
       def open(image_path)
         File.open(image_path, "rb") do |f|
-          self.from_blob(f.read, File.extname(image_path).sub(',', ''))
+          self.from_blob(f.read, File.extname(image_path).sub('.', ''))
         end
       end
       alias_method :from_file, :open
