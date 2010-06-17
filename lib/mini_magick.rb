@@ -31,7 +31,7 @@ module MiniMagick
       # Use this if you don't want to overwrite the image file
       def open(image_path)
         File.open(image_path, "rb") do |f|
-          self.from_blob(f.read, File.extname(image_path))
+          self.from_blob(f.read, File.extname(image_path).sub(',', ''))
         end
       end
       alias_method :from_file, :open
@@ -84,7 +84,7 @@ module MiniMagick
       run_command("mogrify", "-format", format, @path)
 
       old_path = @path.dup
-      @path.sub!(/(\.\w*)?$/, ".#{format}")
+      @path.sub!(/(\.\w+)?$/, ".#{format}")
       File.delete(old_path) unless old_path == @path
 
       unless File.exists?(@path)
@@ -108,11 +108,7 @@ module MiniMagick
 
     # Give you raw data back
     def to_blob
-      f = File.new @path
-      f.binmode
-      f.read
-    ensure
-      f.close if f
+      File.open(@path, 'rb') { |f| f.read }
     end
 
     # If an unknown method is called then it is sent through the morgrify program
