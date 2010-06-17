@@ -84,7 +84,7 @@ module MiniMagick
       run_command("mogrify", "-format", format, @path)
 
       old_path = @path.dup
-      @path.sub!(/(\.\w+)?$/, ".#{format}")
+      @path.sub!(/(\.\w*)?$/, ".#{format}")
       File.delete(old_path) unless old_path == @path
 
       unless File.exists?(@path)
